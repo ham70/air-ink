@@ -21,6 +21,18 @@ while True:
 
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
+            landmark = hand_landmarks.landmark[8]
+
+            # Get pixel coordinates
+            h, w, c = frame.shape
+            cx, cy = int(landmark.x * w), int(landmark.y * h)
+
+            # Draw a circle on the landmark
+            cv2.circle(frame, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
+
+            # Optional: print coordinates
+            print(f"Landmark 8 - X: {cx}, Y: {cy}, Z: {landmark.z:.4f}")
+
             draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
 
     out.write(frame)#write frame to output file
