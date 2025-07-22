@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import math
 
 cam = cv2.VideoCapture(0)#default camera
 frame_width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -12,6 +13,9 @@ draw = mp.solutions.drawing_utils
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
 
+def distance(pt1, pt2):
+    return math.hypot(pt2[0] - pt1[0], pt2[1] - pt1[1])
+
 while True:
     ret, frame = cam.read()
 
@@ -21,17 +25,23 @@ while True:
 
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
-            landmark = hand_landmarks.landmark[8]
-
-            # Get pixel coordinates
             h, w, c = frame.shape
-            cx, cy = int(landmark.x * w), int(landmark.y * h)
 
-            # Draw a circle on the landmark
-            cv2.circle(frame, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
+            # Get thumb tip (4), index tip (8), middle tip (12)
+            thumb_tip = hand_landmarks.landmark[4]
+            index_tip = hand_landmarks.landmark[8]
+            middle_tip = hand_landmarks.landmark[12]
 
-            # Optional: print coordinates
-            print(f"Landmark 8 - X: {cx}, Y: {cy}, Z: {landmark.z:.4f}")
+            thumb_xy = (int(thumb_tip.x * w), int(thumb_tip.y * h))
+            middle_xy = (int(middle_tip.x * w), int(middle_tip.y * h))
+            index_xy = (int(index_tip.x * w), int(index_tip.y * h))
+
+            # Check if thumb and middle finger tips are touching
+            if distance(index_xy, middle_xy) < 15:  # pixel distance threshold (tweak if needed)
+                print(f"Landmark 8 (index tip) - X: {index_xy[0]}, Y: {index_xy[1]}, Z: {index_tip.z:.4f}")
+                cv2.circle(frame, index_xy, 10, (0, 255, 0), cv2.FILLED)  # green circle for index tip
+            else:
+                cv2.circle(frame, index_xy, 10, (0, 0, 255), 2)  # red circle if condition not met
 
             draw.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
 
