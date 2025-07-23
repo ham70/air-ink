@@ -1,0 +1,5 @@
+FRAME_WIDTH = 640
+FRAME_HEIGHT = 480
+TOUCH_THRESHOLD = 15  # pixels
+CANVAS_COLOR = (0, 0, 0)  # black
+DRAW_COLOR = (255, 255, 255)  # white
