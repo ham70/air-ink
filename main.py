@@ -25,10 +25,9 @@ while True:
       tracker.draw_landmarks(frame, hand_landmarks)
 
       if distance(lm[8], lm[12]) < TOUCH_THRESHOLD:
-        drawer.add_point(lm[8])
-        cv2.circle(frame, lm[8], 10, (0, 255, 0), cv2.FILLED)
+        drawer.update(True, lm[8])  # Gesture active
       else:
-        cv2.circle(frame, lm[8], 10, (0, 0, 255), 2)
+        drawer.update(False, lm[8])  # Gesture ended
 
   combined = drawer.overlay(frame)
   cv2.imshow("Virtual Canvas", combined)
