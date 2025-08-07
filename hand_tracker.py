@@ -73,7 +73,7 @@ def main():
   cTime = 0
 
   cap = cv2.VideoCapture(0)
-  detector = handDector()
+  detector = HandDetector()
 
   while True:
     success, img = cap.read()
