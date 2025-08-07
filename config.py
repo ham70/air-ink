@@ -1,5 +1,8 @@
-FRAME_WIDTH = 640
-FRAME_HEIGHT = 480
-TOUCH_THRESHOLD = 20  # pixels
-CANVAS_COLOR = (0, 0, 0)  # black
-DRAW_COLOR = (255, 255, 255)  # white
+FRAME_WIDTH = 1280
+FRAME_HEIGHT = 720
+
+## drawing #########################################
+DRAW_COLOR = (255, 0, 0)
+BRUSH_THICKNESS = 15
+ERASER_THICKNESS = 50
+#########################################
