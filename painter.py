@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 import os
+from config import FRAME_WIDTH, FRAME_HEIGHT
 
 class Painter():
   def __init__(self):
-    self.imgCanvas = np.zeros((720, 1280, 3), np.uint8)
+    self.imgCanvas = np.zeros((FRAME_HEIGHT, FRAME_WIDTH, 3), np.uint8)
 
   #methods ==================================================
   def paint(self, prev, curr, color, thickness):
@@ -19,3 +20,6 @@ class Painter():
     imgInv = cv2.cvtColor(imgInv, cv2.COLOR_GRAY2BGR)
 
     return imgInv
+  
+  def save_canvas(self, path='output/drawing_canvas.png'):
+    cv2.imwrite(path, self.canvas)
