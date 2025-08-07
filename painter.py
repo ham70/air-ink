@@ -21,5 +21,5 @@ class Painter():
 
     return imgInv
   
-  def save_canvas(self, path='output/drawing_canvas.png'):
+  def saveCanvas(self, path='output/drawing_canvas.png'):
     cv2.imwrite(path, self.canvas)
