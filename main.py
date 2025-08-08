@@ -5,6 +5,7 @@ import os
 import hand_tracker as htm
 import painter as paint
 from config import FRAME_WIDTH, FRAME_HEIGHT, BRUSH_THICKNESS, ERASER_THICKNESS
+from latex_recognizer import img2Latex
 
 #setting up headers
 folderPath = 'header'
@@ -52,7 +53,8 @@ while True:
           header = overlayList[1]
           drawColor = (0, 0, 0)
         elif 800 < x1 < 1200:
-          print('solve')
+          painter.saveCanvas()
+          img2Latex()
       cv2.rectangle(img, (x1, y1 - 18), (x2, y2 + 18), drawColor, cv2.FILLED)
     #draw mode (index finger only up)==============================================
     if fingers[1] and fingers[2] == False:
@@ -83,7 +85,8 @@ while True:
   #cv2.imshow("CanvasInv", imgInv)
   if cv2.waitKey(1) & 0xFF == 27:
     break
+  if cv2.waitKey(1) & 0xFF == ord('e'):
+    painter.resetCanvas()
 cap.release()
 cv2.destroyAllWindows()
-
 painter.saveCanvas()
