@@ -22,4 +22,7 @@ class Painter():
     return imgInv
   
   def saveCanvas(self, path='output/drawing_canvas.png'):
-    cv2.imwrite(path, self.canvas)
+    cv2.imwrite(path, self.imgCanvas)
+  
+  def resetCanvas(self):
+    self.imgCanvas = np.zeros((FRAME_HEIGHT, FRAME_WIDTH, 3), np.uint8)
