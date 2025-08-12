@@ -7,8 +7,10 @@ import painter as paint
 from config import FRAME_WIDTH, FRAME_HEIGHT, BRUSH_THICKNESS, ERASER_THICKNESS,CLICK_COOLDOWN
 from api_service import img2Latex
 from solver import processMath
+import threading
 
-#setting up headers
+#========================================================================================================
+#setting up header images
 folderPath = 'header'
 myList = os.listdir(folderPath)
 overlayList = []
@@ -22,13 +24,26 @@ cap = cv2.VideoCapture(0)
 cap.set(3, FRAME_WIDTH)
 cap.set(4, FRAME_HEIGHT)
 
-#setting up detector, painter, and previous coords
-xp, yp = 0, 0
-drawColor  = (255, 255, 255)
+#app setup
+xp, yp = 0, 0#previous index finger coords
+drawColor  = (255, 255, 255)#default drawing color
+lastClickTime = 0#to add click cooldown
+currSolution = None#handling solution
+solving = False
+#app modules
 detector = htm.HandDetector(detectionCon=0.85)
 painter = paint.Painter()
-lastClickTime = 0
-currSolution = None
+#app functions
+def backgroundProcessing():
+  global currSolution, solving
+  solving = True
+  try:
+    text = img2Latex()
+    currSolution = processMath(text)
+  except Exception as e:
+    print("Error solving:", e)
+  solving = False
+#========================================================================================================
 
 while True:
   success, img = cap.read()#import image
@@ -38,12 +53,13 @@ while True:
   img = detector.findHands(img)
   lmList = detector.findPosition(img, draw=False)
 
+  #once we've detected landmarks ==========================================================================
   if len(lmList) != 0:
     x1, y1 = lmList[8][1:]#tip of index finger
     x2, y2 = lmList[12][1:]#tip of middle finger
     fingers = detector.fingersUp()#check which fingers are up
 
-    #if select mode (2 fingers up)==============================================
+    #if select mode (2 fingers up)===============================================================================
     if fingers[1] and fingers[2]:
       xp, yp = x1, y1
       if y1 < 125: #at header
@@ -51,23 +67,20 @@ while True:
         if currentTime - lastClickTime > CLICK_COOLDOWN:
           if 0 < x1 < 175:
             print('select color')
-            canTouchHeader = False
           elif 275 < x1 < 425:
             header = overlayList[0]
             drawColor = (255, 255, 255)
-            canTouchHeader = False
           elif 475 < x1 < 650:
             header = overlayList[1]
             drawColor = (0, 0, 0)
-            canTouchHeader = False
-          elif 800 < x1 < 1200:
+          elif 800 < x1 < 1200 and not solving:
             painter.saveCanvas()
-            text = img2Latex()
-            currSolution = processMath(text)
-            print(currSolution)
+            threading.Thread(target=backgroundProcessing, daemon=True).start()
+
           lastClickTime = currentTime
       cv2.rectangle(img, (x1, y1 - 18), (x2, y2 + 18), drawColor, cv2.FILLED)
-    #draw mode (index finger only up)==============================================
+
+    #draw mode (index finger only up)===============================================================================
     if fingers[1] and fingers[2] == False:
       if drawColor == (0,0,0):
         cv2.circle(img, (x1, y1), 10, drawColor, ERASER_THICKNESS)
@@ -83,7 +96,22 @@ while True:
         painter.paint((xp, yp), (x1, y1), drawColor, BRUSH_THICKNESS)
       xp, yp = x1, y1
 
-  #get image canvas' and merge with main webcam image==============================================
+  #drawing solution frame if needed ====================================================================================
+  if currSolution is not None:
+    rect_w, rect_h = 400, 100
+    rect_x1 = FRAME_WIDTH - rect_w - 20
+    rect_y1 = FRAME_HEIGHT - rect_h - 20
+
+    solutionText = ''#building solution text
+    if currSolution["type"] == "equation":
+      solutionText = f'Solution(s): {currSolution["solutions"]}'
+    else:
+      solutionText = f'Solution: {currSolution["simplified"]}'
+
+    # Put solution text
+    cv2.putText(img, solutionText, (rect_x1 + 10, rect_y1 + 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+  #get image canvas' and merge with main webcam image ===============================================================================
   imgCanvas = painter.getCanvas()
   imgInv = painter.getInvCanvas()
   img = cv2.bitwise_and(img, imgInv)
@@ -93,11 +121,13 @@ while True:
   img[0:125, 0:1280] = header
 
   cv2.imshow("image", img)
-  #cv2.imshow("CanvasInv", imgInv)
-  if cv2.waitKey(1) & 0xFF == 27:
+  key = cv2.waitKey(1) & 0xFF
+  if key == 27 or key == ord('q'):
     break
-  if cv2.waitKey(1) & 0xFF == ord('e'):
+  elif key == ord('c'):
     painter.resetCanvas()
+    currSolution = None
+
+#ending drawing    
 cap.release()
 cv2.destroyAllWindows()
-painter.saveCanvas()
