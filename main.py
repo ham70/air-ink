@@ -4,8 +4,9 @@ import time
 import os
 import hand_tracker as htm
 import painter as paint
-from config import FRAME_WIDTH, FRAME_HEIGHT, BRUSH_THICKNESS, ERASER_THICKNESS
-from latex_recognizer import img2Latex
+from config import FRAME_WIDTH, FRAME_HEIGHT, BRUSH_THICKNESS, ERASER_THICKNESS,CLICK_COOLDOWN
+from api_service import img2Latex
+from solver import processMath
 
 #setting up headers
 folderPath = 'header'
@@ -26,6 +27,8 @@ xp, yp = 0, 0
 drawColor  = (255, 255, 255)
 detector = htm.HandDetector(detectionCon=0.85)
 painter = paint.Painter()
+lastClickTime = 0
+currSolution = None
 
 while True:
   success, img = cap.read()#import image
@@ -44,17 +47,25 @@ while True:
     if fingers[1] and fingers[2]:
       xp, yp = x1, y1
       if y1 < 125: #at header
-        if 0 < x1 < 175:
-          print('select color')
-        elif 275 < x1 < 425:
-          header = overlayList[0]
-          drawColor = (255, 255, 255)
-        elif 475 < x1 < 650:
-          header = overlayList[1]
-          drawColor = (0, 0, 0)
-        elif 800 < x1 < 1200:
-          painter.saveCanvas()
-          img2Latex()
+        currentTime = time.time()
+        if currentTime - lastClickTime > CLICK_COOLDOWN:
+          if 0 < x1 < 175:
+            print('select color')
+            canTouchHeader = False
+          elif 275 < x1 < 425:
+            header = overlayList[0]
+            drawColor = (255, 255, 255)
+            canTouchHeader = False
+          elif 475 < x1 < 650:
+            header = overlayList[1]
+            drawColor = (0, 0, 0)
+            canTouchHeader = False
+          elif 800 < x1 < 1200:
+            painter.saveCanvas()
+            text = img2Latex()
+            currSolution = processMath(text)
+            print(currSolution)
+          lastClickTime = currentTime
       cv2.rectangle(img, (x1, y1 - 18), (x2, y2 + 18), drawColor, cv2.FILLED)
     #draw mode (index finger only up)==============================================
     if fingers[1] and fingers[2] == False:
