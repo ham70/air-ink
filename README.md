@@ -1,15 +1,15 @@
 # air-ink
-# ✋ A Hand Gesture Drawing & Math Solver
+# A Hand Gesture Drawing & Math Solver
 
 This project is an **interactive OpenCV app** that uses **hand tracking with a webcam** to let you:
-- 🎨 Draw on a virtual canvas with finger gestures  
-- 🖱️ Select tools and colors by tapping on a **header menu** at the top of the screen  
-- ✍️ Write simple math expressions and equations by hand and convert them into **LaTeX**  
-- 🧮 Automatically **solve the expressions**  
+- Draw on a virtual canvas with finger gestures  
+- Select tools and colors by tapping on a **header menu** at the top of the screen  
+- Write simple math expressions and equations by hand and convert them into **LaTeX**  
+   Automatically **solve the expressions**  
 
 ---
 
-## 🚀 Features
+## Features
 - **Gesture-based controls**
   - 1 finger → Draw  
   - 2 fingers → Select mode (menu interaction)  
@@ -26,7 +26,7 @@ This project is an **interactive OpenCV app** that uses **hand tracking with a w
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Python 3.10.11**
 - [OpenCV](https://opencv.org/) – webcam input, drawing, preprocessing  
 - [Mediapipe](https://developers.google.com/mediapipe) – hand tracking  
@@ -38,13 +38,13 @@ This project is an **interactive OpenCV app** that uses **hand tracking with a w
 
 ---
 
-## 📝 Environment Notes
-- Developer on Windows 11
+## Environment Notes
+- Developed on Windows 11
 - Python version: 3.10.11
 
 ---
 
-## 📦 Installation
+## Installation
 1. Clone the repo:
    ```bash
    git clone https://github.com/yourusername/air-ink
